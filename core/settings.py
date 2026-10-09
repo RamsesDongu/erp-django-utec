@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'productos',
     'ventas',
     'reportes',
+    'tests',
 ]
 
 MIDDLEWARE = [
@@ -40,6 +41,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -76,9 +78,15 @@ USE_I18N      = True
 USE_TZ        = True
 
 # ── Archivos estáticos ────────────────────────────────────────────────────
+# settings.py — sección de estáticos (verificar, no duplicar)
 STATIC_URL  = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # destino de collectstatic
+
+# STATICFILES_DIRS ≠ STATIC_ROOT (error frecuente)
+STATICFILES_DIRS = [BASE_DIR / 'static']  # fuentes adicionales
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # ── Archivos media ────────────────────────────────────────────────────────
 MEDIA_URL  = '/media/'
