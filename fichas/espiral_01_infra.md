@@ -65,14 +65,12 @@ posterior tenga una URL pública verificable desde el inicio del proyecto.
 - [ ] Captura de pantalla: `evidencias/espiral_01/render_url.png`
 - [ ] Captura de pantalla: `evidencias/espiral_01/manage_check.png`
 - [ ] Resultado de tests: `Ran 33 tests in X.XXXs — OK`
-- [ ] Commit de cierre:C:\Temp_Workspace_ERP>git log --oneline
-080deb9 (HEAD -> main, origin/main) Sprint 0 W03: settings_prod + Procfile + Dockerfile + render.yaml
+- [ ] Commit de cierre:C:C:\Temp_Workspace_ERP>git log --oneline -5
+3c307cb (HEAD -> main, origin/main) Sprint 0 CIERRE [M1]: Render.com desplegado + 35 tests OK + Ficha Schmelkes E1
+080deb9 Sprint 0 W03: settings_prod + Procfile + Dockerfile + render.yaml
 7799f61 Sprint 0 W02 CIERRE: MVT completo + Fable5 + WhiteNoise + 24 tests OK
 d2fd823 Sprint 0 W02: render() + templates Fable5 AzulERP x6 vistas
 44650f4 Sprint 0 W01: ficha Schmelkes espiral 1
-4677165 Sprint 0 W01: suite de tests de entorno (11 tests OK)
-c4bfd30 Sprint 0 W01: entorno portable + proyecto Django base + 5 apps
-
 ---
 
 ## 4. Criterios de aceptación verificados
