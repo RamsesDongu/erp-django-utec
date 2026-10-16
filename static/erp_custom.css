@@ -24,3 +24,132 @@
     font-family: 'JetBrains Mono', Consolas, monospace !important;
     font-size: .9em;
 }
+/* ── JAZZMIN 3.x: Override de colores con Fable 5 AzulERP ─────────────── */
+
+/* ====== SIDEBAR ====== */
+.main-sidebar,
+aside.main-sidebar,
+.sidebar,
+#jazzy-sidebar {
+    background-color: #0A2342 !important;
+    background: #0A2342 !important;
+}
+
+/* ====== NAVBAR SUPERIOR ====== */
+.main-header,
+nav.main-header,
+.navbar,
+#jazzy-navbar {
+    background-color: #0A2342 !important;
+    background: #0A2342 !important;
+    border-bottom: 3px solid #B8860B !important;
+}
+
+/* ====== BRAND / LOGO ====== */
+.brand-link {
+    background-color: #0A2342 !important;
+    border-bottom: 2px solid #B8860B !important;
+}
+.brand-text {
+    color: #D4AF37 !important;
+    font-weight: 700 !important;
+}
+
+/* ====== LINKS DEL SIDEBAR ====== */
+.nav-sidebar .nav-link,
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+.nav-sidebar .nav-link:hover,
+.sidebar .nav-link:hover {
+    background-color: #1B4F8A !important;
+    color: #FFFFFF !important;
+}
+.nav-sidebar .nav-link.active,
+.sidebar .nav-link.active,
+.nav-sidebar .nav-item.menu-open > .nav-link {
+    background-color: #B8860B !important;
+    color: #0A2342 !important;
+    font-weight: 600 !important;
+}
+
+/* ====== HEADERS DE SECCIÓN DENTRO DEL SIDEBAR ====== */
+.nav-sidebar .nav-header,
+.sidebar .nav-header {
+    color: #D4AF37 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+}
+
+/* ====== TÍTULOS DE LAS TARJETAS (Panel de control) ====== */
+.card-primary.card-outline,
+.card-outline.card-primary {
+    border-top: 3px solid #B8860B !important;
+}
+.card-header {
+    background-color: #0A2342 !important;
+    color: #FFFFFF !important;
+    border-bottom: 2px solid #B8860B !important;
+}
+
+/* ====== BOTONES "AGREGAR" / "MODIFICAR" ====== */
+.btn-success {
+    background-color: #1A7A4A !important;
+    border-color: #1A7A4A !important;
+}
+.btn-info {
+    background-color: #1B4F8A !important;
+    border-color: #1B4F8A !important;
+}
+
+/* ====== BREADCRUMB ====== */
+.breadcrumb {
+    background-color: transparent !important;
+}
+.breadcrumb a {
+    color: #1B4F8A !important;
+}
+
+/* ====== LINKS GENERALES ====== */
+a { color: #1B4F8A; }
+a:hover { color: #B8860B; }
+
+/* ====== FOOTER ====== */
+.main-footer {
+    background-color: #0A2342 !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-top: 3px solid #B8860B !important;
+}
+
+/* ====== CONTENIDO PRINCIPAL ====== */
+.content-wrapper {
+    background-color: #F5F7FA !important;
+}
+/* Sidebar color navy */
+.main-sidebar, .sidebar { background-color: #0A2342 !important; }
+
+/* Navbar color navy */
+.main-header.navbar { background-color: #0A2342 !important; }
+
+/* Brand / logo area */
+.brand-link { border-bottom: 1px solid #B8860B !important; }
+.brand-text  { color: #D4AF37 !important; font-weight: 700 !important; }
+
+/* Sidebar links */
+.nav-sidebar .nav-link { color: rgba(255,255,255,.82) !important; }
+.nav-sidebar .nav-link:hover,
+.nav-sidebar .nav-link.active {
+    background-color: #1B4F8A !important;
+    color: #FFFFFF !important;
+}
+
+/* Accent: botones y badges en dorado */
+.accent-navy .nav-sidebar .nav-link.active {
+    background-color: #B8860B !important;
+}
+
+/* Footer */
+.main-footer { border-top: 2px solid #B8860B; }
+

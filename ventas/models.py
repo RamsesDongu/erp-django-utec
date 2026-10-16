@@ -1,5 +1,5 @@
 # ventas/models.py
-"""Modelos de la app ventas — Espiral 2 W05.
+"""Modelos de la app ventas — Espiral 2 W05/W06.
 
 Modelos implementados:
     Venta        — encabezado de una venta interna.
@@ -11,9 +11,16 @@ Decisiones de diseño aplicadas:
     D-04: Venta.total    → @property calculada, no campo de BD.
     D-05: DetalleVenta.producto → PROTECT.
     D-06: DetalleVenta.precio_unitario → almacenado (histórico).
+
+Validaciones W06:
+    - DetalleVenta.clean() → cantidad ≥ 1
+    - Pedido.clean()       → fecha_entrega no anterior a fecha_pedido
+    - Pedido.total_pagado  → MinValueValidator(0.00)
 """
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from clientes.models  import Cliente
@@ -107,6 +114,17 @@ class DetalleVenta(models.Model):
         """Subtotal de la línea: cantidad × precio_unitario."""
         return self.precio_unitario * self.cantidad
 
+    def clean(self) -> None:
+        """Validación de negocio para línea de detalle.
+
+        Raises:
+            ValidationError: si cantidad < 1.
+        """
+        if self.cantidad is not None and self.cantidad < 1:
+            raise ValidationError(
+                {'cantidad': 'La cantidad debe ser al menos 1.'}
+            )
+
     def save(self, *args, **kwargs) -> None:
         """Captura el precio actual del producto si no se especificó.
 
@@ -160,8 +178,11 @@ class Pedido(models.Model):
         null=True, blank=True, verbose_name='Fecha de entrega'
     )
     total_pagado  = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        null=True, blank=True,
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal('0.00'))],  # ← agregado en W06
         verbose_name='Total pagado'
     )
 
@@ -172,3 +193,18 @@ class Pedido(models.Model):
 
     def __str__(self) -> str:
         return f"{self.numero_pedido} — {self.cliente} [{self.get_estado_display()}]"
+
+    def clean(self) -> None:
+        """Valida que la fecha de entrega no sea anterior al pedido.
+
+        Raises:
+            ValidationError: si fecha_entrega < fecha_pedido.date().
+        """
+        if (self.fecha_entrega and self.fecha_pedido and
+                self.fecha_entrega < self.fecha_pedido.date()):
+            raise ValidationError({
+                'fecha_entrega': (
+                    'La fecha de entrega no puede ser anterior '
+                    'a la fecha del pedido.'
+                )
+            })
