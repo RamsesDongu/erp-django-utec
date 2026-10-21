@@ -1,5 +1,5 @@
 # core/views.py
-"""Vistas principales del proyecto ERP — W02.
+"""Vistas principales del proyecto ERP — W07.
 
 Migración: HttpResponse → render() con templates y contexto.
 """
@@ -20,31 +20,31 @@ def bienvenida(request):
         {
             'nombre': 'Productos',
             'icono': '📦',
-            'url': reverse('productos:inicio'),
+            'url': reverse('productos:lista'),
             'descripcion': 'Inventario, precios y stock',
         },
         {
             'nombre': 'Clientes',
             'icono': '👥',
-            'url': reverse('clientes:inicio'),
+            'url': reverse('clientes:lista'),
             'descripcion': 'Cartera y gestión de clientes',
         },
         {
             'nombre': 'Proveedores',
             'icono': '🏭',
-            'url': reverse('proveedores:inicio'),
+            'url': reverse('proveedores:lista'),
             'descripcion': 'Red de proveedores',
         },
         {
             'nombre': 'Ventas',
             'icono': '💰',
-            'url': reverse('ventas:inicio'),
+            'url': reverse('ventas:lista'),
             'descripcion': 'Pedidos, facturas y cobros',
         },
         {
             'nombre': 'Reportes',
             'icono': '📊',
-            'url': reverse('reportes:inicio'),
+            'url': reverse('reportes:inicio'), # Reportes aún usa 'inicio'
             'descripcion': 'Dashboard y analítica',
         },
         {
@@ -54,4 +54,6 @@ def bienvenida(request):
             'descripcion': 'Panel de administración Django',
         },
     ]
+    
+    # ¡ESTA LÍNEA ES LA QUE FALTABA!
     return render(request, 'bienvenida.html', {'modulos': modulos})
