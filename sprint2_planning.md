@@ -42,3 +42,19 @@ protegidos por autenticación y 3 roles de acceso.
 | 13 tests de escritura (auth + POST válido/inválido) | ✅ W08 |
 | Login/Logout + LoginRequired ya aplicado | ✅ W08 |
 | 3 roles RBAC (Gerente/Vendedor/Almacén) | ⏳ W09 |
+
+
+---
+
+## Sprint 2 — Estado final W09
+
+| HU | Estado | Pts |
+|---|---|---|
+| HU-E3-01 a HU-E3-09 | ✅ Completadas | 27/27 |
+
+## Hito M3 — ALCANZADO ✅
+- CRUD: 4 módulos funcionales
+- Auth: allauth con login/logout Fable 5
+- RBAC: 3 grupos (Gerente/Vendedor/Almacen) con permisos
+- Tests: Ran 108 tests → OK
+- Fecha: 21/10/2026

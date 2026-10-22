@@ -1,12 +1,13 @@
-"""Vistas de la app ventas — W08.
+"""Vistas de la app ventas — W09.
 
 Lectura (W07): VentaListView y VentaDetailView.
-Escritura (W08): crear_venta (función con dos formularios) y
-VentaDeleteView.
+Escritura (W08): crear_venta (función) y VentaDeleteView.
+Autorización (W09): @login_required + @permission_required en función.
+                    PermissionRequiredMixin en DeleteView.
 """
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView
@@ -17,23 +18,17 @@ from .models import DetalleVenta, Venta
 
 class VentaListView(ListView):
     """Lista paginada de ventas en orden cronológico inverso."""
-
     model               = Venta
     template_name       = 'ventas/lista.html'
     context_object_name = 'ventas'
     paginate_by         = 20
 
     def get_queryset(self):
-        return (
-            Venta.objects
-            .select_related('cliente')
-            .order_by('-fecha')
-        )
+        return Venta.objects.select_related('cliente').order_by('-fecha')
 
 
 class VentaDetailView(DetailView):
     """Detalle de una venta con todas sus líneas de producto."""
-
     model               = Venta
     template_name       = 'ventas/detalle.html'
     context_object_name = 'venta'
@@ -47,15 +42,10 @@ class VentaDetailView(DetailView):
         )
 
 
+@login_required
+@permission_required('ventas.add_venta', raise_exception=True)
 def crear_venta(request):
-    """Crea un encabezado de venta con una línea de detalle.
-
-    GET  → muestra los dos formularios vacíos.
-    POST → valida ambos, guarda si correctos, muestra errores si no.
-    """
-    if not request.user.is_authenticated:
-        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
-
+    """Crea un encabezado de venta con una línea de detalle."""
     venta_form   = VentaForm(request.POST or None)
     detalle_form = DetalleVentaForm(request.POST or None)
 
@@ -78,13 +68,16 @@ def crear_venta(request):
     })
 
 
-class VentaDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de una venta (y sus detalles en cascada)."""
-
-    model         = Venta
-    template_name = 'ventas/eliminar.html'
-    pk_url_kwarg  = 'venta_id'
-    success_url   = reverse_lazy('ventas:lista')
+class VentaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Confirmación y borrado de una venta (y sus detalles en cascada).
+    Requiere permiso 'ventas.delete_venta'.
+    """
+    model               = Venta
+    template_name       = 'ventas/eliminar.html'
+    pk_url_kwarg        = 'venta_id'
+    success_url         = reverse_lazy('ventas:lista')
+    permission_required = 'ventas.delete_venta'
+    raise_exception     = True
 
     def form_valid(self, form):
         pk       = self.object.pk

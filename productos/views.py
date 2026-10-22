@@ -1,11 +1,11 @@
-"""Vistas de la app productos — W08.
+"""Vistas de la app productos — W09.
 
 Lectura (W07): ListView y DetailView.
-Escritura (W08): CreateView, UpdateView y DeleteView protegidas con
-LoginRequiredMixin y mensajes flash.
+Escritura (W08): CreateView, UpdateView y DeleteView.
+Autorización (W09): PermissionRequiredMixin en DeleteView.
 """
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -17,7 +17,6 @@ from .models import Producto
 
 class ProductoListView(ListView):
     """Lista paginada de productos activos."""
-
     model               = Producto
     template_name       = 'productos/lista.html'
     context_object_name = 'productos'
@@ -34,7 +33,6 @@ class ProductoListView(ListView):
 
 class ProductoDetailView(DetailView):
     """Detalle de un producto por ID de URL."""
-
     model               = Producto
     template_name       = 'productos/detalle.html'
     context_object_name = 'producto'
@@ -46,7 +44,6 @@ class ProductoDetailView(DetailView):
 
 class ProductoCreateView(LoginRequiredMixin, CreateView):
     """Formulario para crear un nuevo producto."""
-
     model         = Producto
     form_class    = ProductoForm
     template_name = 'productos/crear.html'
@@ -63,7 +60,6 @@ class ProductoCreateView(LoginRequiredMixin, CreateView):
 
 class ProductoUpdateView(LoginRequiredMixin, UpdateView):
     """Formulario para editar un producto existente."""
-
     model         = Producto
     form_class    = ProductoForm
     template_name = 'productos/editar.html'
@@ -79,19 +75,19 @@ class ProductoUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class ProductoDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de un producto."""
-
-    model         = Producto
-    template_name = 'productos/eliminar.html'
-    pk_url_kwarg  = 'producto_id'
-    success_url   = reverse_lazy('productos:lista')
+class ProductoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Confirmación y borrado de un producto.
+    Requiere permiso 'productos.delete_producto'.
+    """
+    model               = Producto
+    template_name       = 'productos/eliminar.html'
+    pk_url_kwarg        = 'producto_id'
+    success_url         = reverse_lazy('productos:lista')
+    permission_required = 'productos.delete_producto'
+    raise_exception     = True  # 403 para autenticados sin permiso
 
     def form_valid(self, form):
         nombre   = self.object.nombre
         response = super().form_valid(form)
-        messages.success(
-            self.request,
-            f'Producto "{nombre}" eliminado.'
-        )
+        messages.success(self.request, f'Producto "{nombre}" eliminado.')
         return response

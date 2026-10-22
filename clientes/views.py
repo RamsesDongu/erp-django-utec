@@ -1,10 +1,11 @@
-"""Vistas de la app clientes — W08.
+"""Vistas de la app clientes — W09.
 
 Lectura (W07): ListView y DetailView.
 Escritura (W08): CreateView, UpdateView y DeleteView.
+Autorización (W09): PermissionRequiredMixin en DeleteView.
 """
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -16,7 +17,6 @@ from .models import Cliente
 
 class ClienteListView(ListView):
     """Lista paginada de clientes activos."""
-
     model               = Cliente
     template_name       = 'clientes/lista.html'
     context_object_name = 'clientes'
@@ -28,7 +28,6 @@ class ClienteListView(ListView):
 
 class ClienteDetailView(DetailView):
     """Detalle de un cliente con su historial de ventas."""
-
     model               = Cliente
     template_name       = 'clientes/detalle.html'
     context_object_name = 'cliente'
@@ -42,7 +41,6 @@ class ClienteDetailView(DetailView):
 
 class ClienteCreateView(LoginRequiredMixin, CreateView):
     """Formulario para crear un nuevo cliente."""
-
     model         = Cliente
     form_class    = ClienteForm
     template_name = 'clientes/crear.html'
@@ -59,7 +57,6 @@ class ClienteCreateView(LoginRequiredMixin, CreateView):
 
 class ClienteUpdateView(LoginRequiredMixin, UpdateView):
     """Formulario para editar un cliente."""
-
     model         = Cliente
     form_class    = ClienteForm
     template_name = 'clientes/editar.html'
@@ -75,13 +72,16 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class ClienteDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de un cliente."""
-
-    model         = Cliente
-    template_name = 'clientes/eliminar.html'
-    pk_url_kwarg  = 'cliente_id'
-    success_url   = reverse_lazy('clientes:lista')
+class ClienteDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Confirmación y borrado de un cliente.
+    Requiere permiso 'clientes.delete_cliente'.
+    """
+    model               = Cliente
+    template_name       = 'clientes/eliminar.html'
+    pk_url_kwarg        = 'cliente_id'
+    success_url         = reverse_lazy('clientes:lista')
+    permission_required = 'clientes.delete_cliente'
+    raise_exception     = True
 
     def form_valid(self, form):
         nombre   = self.object.nombre
