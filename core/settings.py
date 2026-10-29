@@ -99,6 +99,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # ── Archivos media ────────────────────────────────────────────────────────
+# Archivos media (imágenes subidas por usuarios)
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
