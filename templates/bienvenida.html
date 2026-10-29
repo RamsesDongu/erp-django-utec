@@ -2,33 +2,62 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<div class="text-center py-4">
-    <h1 style="font-family:'Playfair Display',serif;
-               color:var(--clr-navy);font-size:2.2rem;">
-        📦 ERP Django
-    </h1>
-    <p style="color:var(--clr-muted);font-size:1.05rem;">
-        Sistema de gestión empresarial · UTEC Celaya · Espiral 1 W02
-    </p>
-    <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
-        <span class="badge-erp-gold">Django 4.2 LTS</span>
-        <span class="badge-erp-gold">Python 3.11</span>
-        <span class="badge-erp-gold">Fable 5 AzulERP</span>
+<div class="main-container">
+    
+    <!-- TÍTULO PRINCIPAL DESTACADO -->
+    <div>
+        <h1 class="hero-title">Dongu's</h1>
+        <p class="hero-subtitle">High Spirits & Fine Motors</p> 
     </div>
-</div>
 
-<div class="row g-3 mt-2">
-    {% for m in modulos %}
-    <div class="col-md-4">
-        <div class="erp-card text-center"
-             style="cursor:pointer;" onclick="window.location='{{ m.url }}'">
-            <div style="font-size:2rem;margin-bottom:.4rem;">{{ m.icono }}</div>
-            <strong style="color:var(--clr-navy);">{{ m.nombre }}</strong>
-            <p style="color:var(--clr-muted);font-size:.85rem;margin:.3rem 0 0;">
-                {{ m.descripcion }}
-            </p>
+    <!-- BOTONES DE ACCESO DIRECTO -->
+    <div class="row g-4 justify-content-center" style="max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Catálogo -->
+        <div class="col-md-4">
+            <a href="{% url 'productos:lista' %}" class="erp-card-btn">
+                <div class="card-icon">🏎️</div>
+                <h2 class="card-title">Catálogo</h2>
+                <p class="card-desc">Autos Deportivos y de Colección</p>
+            </a>
         </div>
+
+        <!-- Clientes -->
+        <div class="col-md-4">
+            <a href="{% url 'clientes:lista' %}" class="erp-card-btn">
+                <div class="card-icon">🤵</div>
+                <h2 class="card-title">Clientes</h2>
+                <p class="card-desc">Membresía VIP y clientes distinguidos</p>
+            </a>
+        </div>
+
+        <!-- Proveedores -->
+        <div class="col-md-4">
+            <a href="{% url 'proveedores:lista' %}" class="erp-card-btn">
+                <div class="card-icon">🚢</div>
+                <h2 class="card-title">Proveedores</h2>
+                <p class="card-desc">Importaciones exclusivas</p>
+            </a>
+        </div>
+
+        <!-- Ventas -->
+        <div class="col-md-4">
+            <a href="{% url 'ventas:lista' %}" class="erp-card-btn">
+                <div class="card-icon">🔑</div>
+                <h2 class="card-title">Ventas</h2>
+                <p class="card-desc">Contratos y entregas de unidades</p>
+            </a>
+        </div>
+
+        <!-- Reportes -->
+        <div class="col-md-4">
+            <a href="{% url 'reportes:inicio' %}" class="erp-card-btn">
+                <div class="card-icon">📈</div>
+                <h2 class="card-title">Reportes</h2>
+                <p class="card-desc">Análisis de mercado exclusivo</p>
+            </a>
+        </div>
+
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

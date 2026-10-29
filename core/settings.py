@@ -13,7 +13,7 @@ DEBUG       = env('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 # ── Apps instaladas ───────────────────────────────────────────────────────
-# core/settings.py — actualizar INSTALLED_APPS
+# core/settings.py — actualizar INSTALLED_APPS (terceros):
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -22,12 +22,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',        # ← requerido por allauth
+    'django.contrib.sites',
     # Terceros
-    'allauth',                     # ← nuevo
-    'allauth.account',             # ← nuevo
-    'allauth.socialaccount',       # ← nuevo (para OAuth futuro)
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'rest_framework',
+    'rest_framework.authtoken',
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -36,8 +37,9 @@ INSTALLED_APPS = [
     'ventas',
     'reportes',
     'configuracion',
-    'core',                        # ← AGREGAR ESTA LÍNEA
+    'core',  # <--- ¡ESTA ES LA LÍNEA QUE FALTA!
 ]
+
 
 
 MIDDLEWARE = [
@@ -106,10 +108,17 @@ LOGIN_REDIRECT_URL  = '/productos/'
 LOGOUT_REDIRECT_URL = '/'
 
 # ── DRF ──────────────────────────────────────────────────────────────────
+# core/settings.py — reemplazar la configuración REST_FRAMEWORK de W01:
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',   # para el navegador
+        'rest_framework.authentication.TokenAuthentication',     # para clientes externos
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -119,11 +128,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ── JAZZMIN — Personalización del admin con Fable 5 AzulERP ───────────────
 JAZZMIN_SETTINGS = {
     # Identidad
-    'site_title':       'ERP Django',
-    'site_header':      'ERP UTEC Celaya',
-    'site_brand':       '📦 ERP Django',
-    'welcome_sign':     'Bienvenido al Sistema ERP · UTEC Celaya',
-    'copyright':        'MC. Román Fernando López González · UTEC Celaya',
+    'site_title':       "Dongu's Admin",
+    'site_header':      "Dongu's",
+    'site_brand':       "Dongu's",
+    'welcome_sign':     'Dongu',
+    'copyright':        'Ramses Oswaldo Dongu Martinez',
 
     # Icono del sitio (usar emoji como fallback)
     'site_icon':        None,
