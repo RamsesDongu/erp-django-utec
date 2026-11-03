@@ -1,185 +1,217 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Inicio{% endblock %} | Dongu's - Autos de Lujo</title>
+    <title>{% block title %}Inicio{% endblock %} | Dongu's</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Fuentes: Bangers (estilo graffiti/cómic) e Inter (legibilidad) -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* TOKENS DE COLOR - ESTILO PROFESIONAL */
-        :root, [data-theme="light"] {
-            --clr-navy   : #1A1A1A; 
-            --clr-gold   : #D4AF37; 
-            --clr-bg     : #F7F5F0; 
-            --clr-surface: #FFFFFF;
-            --clr-text   : #1C1C1C;
-            --clr-muted  : #6B6B6B;
-            --clr-border : #E0D8C8;
-            --shadow-sm  : 0 4px 12px rgba(0,0,0,.05);
-            --shadow-md  : 0 8px 24px rgba(26,26,26,.15);
+        /* PALETA URBANA: Negro, Verde, Morado */
+        :root {
+            --clr-bg-dark: #121212;
+            --clr-brick: #2a2a2a;
+            --clr-brick-line: #1a1a1a;
+            --clr-green: #39FF14; /* Verde Neón */
+            --clr-purple: #8A2BE2; /* Morado Eléctrico */
+            --clr-white: #E0E0E0;
+            --clr-surface: #1E1E1E;
+            --shadow-neon: 0 0 10px rgba(57, 255, 20, 0.4);
+            --shadow-purple: 0 0 15px rgba(138, 43, 226, 0.4);
         }
         
-        /* ESTILO GENERAL */
+        /* FONDO DE LADRILLOS GRISES HECHO CON CSS */
         body {
-            font-family: 'Inter','Segoe UI',sans-serif;
-            background: var(--clr-bg);
-            color: var(--clr-text);
+            font-family: 'Inter', sans-serif;
+            color: var(--clr-white);
             margin: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-color: var(--clr-bg-dark);
+            background-image: 
+                linear-gradient(335deg, var(--clr-brick-line) 23px, transparent 23px),
+                linear-gradient(155deg, var(--clr-brick-line) 23px, transparent 23px),
+                linear-gradient(335deg, var(--clr-brick-line) 23px, transparent 23px),
+                linear-gradient(155deg, var(--clr-brick-line) 23px, transparent 23px);
+            background-size: 58px 58px;
+            background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
         }
 
-        /* BARRA SUPERIOR DISCRETA */
+        /* BARRA SUPERIOR */
         .top-bar {
-            background: transparent;
-            padding: 1.5rem 2rem;
+            background: rgba(18, 18, 18, 0.9);
+            border-bottom: 3px solid var(--clr-purple);
+            padding: 1rem 2rem;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            gap: 1.5rem;
+            backdrop-filter: blur(5px);
         }
-        .top-bar a {
-            color: var(--clr-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.3s;
+        .brand-logo {
+            font-family: 'Bangers', cursive;
+            font-size: 2.5rem;
+            color: var(--clr-green);
+            text-shadow: 2px 2px 0 var(--clr-purple), 4px 4px 10px #000;
+            margin: 0;
+            letter-spacing: 2px;
         }
-        .top-bar a:hover { color: var(--clr-gold); }
-        .top-bar .admin-btn {
-            background: var(--clr-navy);
-            color: var(--clr-gold);
-            padding: 0.5rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid var(--clr-gold);
+        .top-bar a { color: var(--clr-white); text-decoration: none; margin-left: 1.5rem; font-weight: 600; transition: color 0.3s;}
+        .top-bar a:hover { color: var(--clr-green); text-shadow: var(--shadow-neon); }
+        .admin-btn {
+            border: 2px solid var(--clr-green);
+            padding: 0.4rem 1rem;
+            border-radius: 5px;
+            color: var(--clr-green) !important;
         }
-        .top-bar .admin-btn:hover { background: var(--clr-gold); color: var(--clr-navy); }
+        .admin-btn:hover { background: var(--clr-green); color: #000 !important; box-shadow: var(--shadow-neon); }
 
-        /* BOTONES PRINCIPALES (Las tarjetas) */
-        .main-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        /* CONTENIDO Y TARJETAS */
+        .main-container { flex-grow: 1; padding: 3rem 2rem; position: relative; }
+        
+        /* TÍTULO GRAFITTI EN EL FONDO (Marca de agua) */
+        .graffiti-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            font-family: 'Bangers', cursive;
+            font-size: 25vw;
+            color: rgba(57, 255, 20, 0.03); /* Muy transparente */
+            text-shadow: 5px 5px 0 rgba(138, 43, 226, 0.05);
+            z-index: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* TARJETAS ESTILO CÓMIC */
+        .erp-card {
+            background: var(--clr-surface);
+            border: 3px solid #333;
+            border-radius: 15px; 
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
             padding: 2rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .erp-card:hover {
+            transform: translate(-5px, -5px);
+            box-shadow: 12px 12px 0 var(--clr-purple);
+            border-color: var(--clr-green);
+        }
+        .erp-card-header {
+            background: var(--clr-bg-dark);
+            color: var(--clr-green);
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1.5px;
+            font-size: 1.5rem;
+            border-bottom: 2px dashed #444;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        /* TÍTULO GIGANTE Y DESTACADO */
+        /* TÍTULOS DE PÁGINA */
         .hero-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 7rem;
-            color: var(--clr-gold);
+            font-family: 'Bangers', cursive;
+            font-size: 6rem;
+            color: var(--clr-white);
             text-align: center;
+            text-shadow: 4px 4px 0 var(--clr-purple), -2px -2px 0 var(--clr-green);
             letter-spacing: 5px;
             margin-bottom: 0;
-            line-height: 1;
-            text-shadow: 3px 3px 20px rgba(212, 175, 55, 0.3);
         }
-        .hero-subtitle {
-            text-align: center;
-            color: var(--clr-muted);
-            font-size: 1.3rem;
-            letter-spacing: 10px;
-            text-transform: uppercase;
-            margin-top: 15px;
-            margin-bottom: 4rem;
-            font-weight: 300;
-        }
-
-        /* LAS TARJETAS/BOTONES */
-        .erp-card-btn {
-            background: var(--clr-surface);
-            border: 1px solid var(--clr-border);
-            border-radius: 20px;
-            box-shadow: var(--shadow-sm);
-            padding: 3rem 1.5rem;
-            text-align: center;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        .erp-card-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--clr-gold);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-        .erp-card-btn:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
-            border-color: var(--clr-gold);
-            color: var(--clr-text);
-        }
-        .erp-card-btn:hover::before { transform: scaleX(1); }
         
-        .card-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-        .erp-card-btn:hover .card-icon { transform: scale(1.1); }
+        /* TABLAS */
+        .erp-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .erp-table th { background: #111; color: var(--clr-purple); border-bottom: 2px solid var(--clr-purple); padding: 1rem; text-align: left; }
+        .erp-table td { padding: 1rem; border-bottom: 1px solid #333; color: var(--clr-white); }
+        .erp-table tr:hover td { background: rgba(57, 255, 20, 0.05); }
 
-        .card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            color: var(--clr-navy);
-            font-weight: 700;
-            margin: 0;
+        /* BOTONES */
+        .btn-erp-gold { /* Lo renombramos visualmente a verde neón */
+            background: var(--clr-green);
+            color: #000;
+            font-weight: 800;
+            text-transform: uppercase;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: .6rem 1.5rem;
+            box-shadow: 3px 3px 0 #000;
+            transition: all 0.2s;
         }
-        .card-desc {
-            color: var(--clr-muted);
-            font-size: 0.95rem;
-            margin-top: 10px;
-            letter-spacing: 0.5px;
+        .btn-erp-gold:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #000;
+            background: #2ecc71;
+            color: #000;
         }
+        .btn-erp-primary {
+            background: transparent;
+            color: var(--clr-purple);
+            border: 2px solid var(--clr-purple);
+            border-radius: 8px;
+            padding: .5rem 1.2rem;
+            font-weight: 600;
+        }
+        .btn-erp-primary:hover { background: var(--clr-purple); color: #fff; box-shadow: var(--shadow-purple); }
+        
+        .btn-erp-danger { background: transparent; color: #ff4444; border: 2px solid #ff4444; border-radius: 8px; padding: .5rem 1.2rem;}
+        .btn-erp-danger:hover { background: #ff4444; color: #fff; }
 
-        /* TABLAS Y FORMULARIOS */
-        .erp-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-sm); }
-        .erp-table thead th { background: var(--clr-navy); color: var(--clr-gold); padding: .75rem 1rem; text-transform: uppercase; font-size: .82rem; letter-spacing: .06em; border-bottom: 3px solid var(--clr-gold); }
-        .erp-table tbody td { background: var(--clr-surface); padding: .65rem 1rem; border-bottom: 1px solid var(--clr-border); }
-        .btn-erp-gold { background: linear-gradient(135deg, #D4AF37 0%, #E5C158 100%); color: var(--clr-navy); border-radius: 8px; padding: .45rem 1.2rem; font-weight: 600; text-decoration: none; transition: all .3s; border: none; cursor: pointer;}
-        .btn-erp-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6); color: var(--clr-navy);}
-        .btn-erp-primary { background: var(--clr-navy); color: var(--clr-gold); border: 1px solid var(--clr-gold); border-radius: 8px; padding: .45rem 1.2rem; text-decoration: none; transition: all .3s; }
-        .btn-erp-primary:hover { background: var(--clr-gold); color: var(--clr-navy); }
-        .btn-erp-danger { background: var(--clr-danger); color: #FFF; border-radius: 8px; padding: .4rem 1rem; text-decoration: none; border: none; }
-        .erp-input { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: 8px; padding: .5rem .85rem; width: 100%; }
-        .erp-input:focus { outline: none; border-color: var(--clr-gold); }
+        /* FORMULARIOS */
+        .erp-input {
+            background: #0a0a0a;
+            border: 2px solid #444;
+            color: var(--clr-white);
+            border-radius: 8px;
+            padding: .7rem;
+            width: 100%;
+            transition: border 0.3s;
+        }
+        .erp-input:focus {
+            outline: none;
+            border-color: var(--clr-green);
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+        }
+        label { color: var(--clr-purple); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;}
+        
+        /* ETIQUETAS DE ESTADO */
+        .badge-erp-active { background: rgba(57, 255, 20, 0.1); color: var(--clr-green); border: 1px solid var(--clr-green); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; }
+        .badge-erp-inactive { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold;}
     </style>
 </head>
 
 <body>
-    <!-- TOP BAR -->
+    <!-- Título Graffiti de fondo -->
+    <div class="graffiti-bg">DONGU'S</div>
+
+    <!-- BARRA SUPERIOR -->
     <header class="top-bar">
-        {% if user.is_authenticated %}
-            <span style="color: var(--clr-navy); font-weight: 600;"><i class="fas fa-user-circle"></i> {{ user.username }}</span>
-            <a href="/accounts/logout/">Cerrar Sesión</a>
-        {% else %}
-            <a href="/accounts/login/">Iniciar Sesión</a>
-        {% endif %}
-        <a href="/admin/" class="admin-btn"><i class="fas fa-cog"></i> Admin</a>
+        <h1 class="brand-logo">Dongu's</h1>
+        <div>
+            {% if user.is_authenticated %}
+                <span style="color: var(--clr-green); font-weight: 600;"><i class="fas fa-user-circle"></i> {{ user.username }}</span>
+                <a href="/accounts/logout/">Cerrar Sesión</a>
+            {% else %}
+                <a href="/accounts/login/">Iniciar Sesión</a>
+            {% endif %}
+            <a href="/admin/" class="admin-btn"><i class="fas fa-cog"></i> Admin</a>
+        </div>
     </header>
 
     <!-- CONTENIDO -->
-    <main>
+    <main class="main-container">
         {% if messages %}
         <div class="container mt-3">
             {% for m in messages %}
-            <div class="alert alert-{% if m.tags == 'error' %}danger{% elif m.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+            <div class="alert alert-{% if m.tags == 'error' %}danger{% elif m.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
                 {{ m }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>

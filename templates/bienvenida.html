@@ -2,62 +2,68 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<div class="main-container">
+<div class="main-container" style="position: relative; z-index: 1;">
     
-    <!-- TÍTULO PRINCIPAL DESTACADO -->
-    <div>
-        <h1 class="hero-title">Dongu's</h1>
-        <p class="hero-subtitle">High Spirits & Fine Motors</p> 
+    <!-- TÍTULO CON IMAGEN Y LEVITACIÓN -->
+    <div class="mb-5 text-center">
+        <img src="/static/titulo.png" alt="Dongu's Autos de Lujo" class="flotar" style="max-width: 80%; height: auto; transform: rotate(-2deg); mix-blend-mode: screen; filter: drop-shadow(0px 15px 25px rgba(57, 255, 20, 0.3));">
     </div>
 
-    <!-- BOTONES DE ACCESO DIRECTO -->
-    <div class="row g-4 justify-content-center" style="max-width: 1200px; margin: 0 auto;">
+    <!-- TARJETAS -->
+    <div class="row g-4 justify-content-center align-items-stretch"> <!-- align-items-stretch iguala las alturas -->
         
-        <!-- Catálogo -->
-        <div class="col-md-4">
-            <a href="{% url 'productos:lista' %}" class="erp-card-btn">
-                <div class="card-icon">🏎️</div>
-                <h2 class="card-title">Catálogo</h2>
-                <p class="card-desc">Autos Deportivos y de Colección</p>
+        <!-- Catálogo (Golf GTI) -->
+        <div class="col-md-4 d-flex"> <!-- d-flex estira el contenedor -->
+            <a href="{% url 'productos:lista' %}" class="erp-card text-center text-decoration-none w-100 d-flex flex-column justify-content-between" style="display:block;">
+                <img src="/static/golf.png" alt="Golf GTI" style="height: 120px; width: 100%; object-fit: contain; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--clr-green));">
+                <h2 class="erp-card-header mt-3">Catálogo</h2>
             </a>
         </div>
 
-        <!-- Clientes -->
-        <div class="col-md-4">
-            <a href="{% url 'clientes:lista' %}" class="erp-card-btn">
-                <div class="card-icon">🤵</div>
-                <h2 class="card-title">Clientes</h2>
-                <p class="card-desc">Membresía VIP y clientes distinguidos</p>
+        <!-- Clientes (pibble.png) -->
+        <div class="col-md-4 d-flex">
+            <a href="{% url 'clientes:lista' %}" class="erp-card text-center text-decoration-none w-100 d-flex flex-column justify-content-between" style="display:block;">
+                <img src="/static/pibble.png" alt="Clientes" style="height: 120px; width: 100%; object-fit: contain; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--clr-purple));">
+                <h2 class="erp-card-header mt-3">Clientes</h2>
             </a>
         </div>
 
-        <!-- Proveedores -->
-        <div class="col-md-4">
-            <a href="{% url 'proveedores:lista' %}" class="erp-card-btn">
-                <div class="card-icon">🚢</div>
-                <h2 class="card-title">Proveedores</h2>
-                <p class="card-desc">Importaciones exclusivas</p>
+        <!-- Proveedores (lala.png) -->
+        <div class="col-md-4 d-flex">
+            <a href="{% url 'proveedores:lista' %}" class="erp-card text-center text-decoration-none w-100 d-flex flex-column justify-content-between" style="display:block;">
+                <img src="/static/lala.png" alt="Proveedores" style="height: 120px; width: 100%; object-fit: contain; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--clr-white));">
+                <h2 class="erp-card-header mt-3">Proveedores</h2>
             </a>
         </div>
 
-        <!-- Ventas -->
-        <div class="col-md-4">
-            <a href="{% url 'ventas:lista' %}" class="erp-card-btn">
-                <div class="card-icon">🔑</div>
-                <h2 class="card-title">Ventas</h2>
-                <p class="card-desc">Contratos y entregas de unidades</p>
+        <!-- Ventas (dolar.png) -->
+        <div class="col-md-4 d-flex">
+            <a href="{% url 'ventas:lista' %}" class="erp-card text-center text-decoration-none w-100 d-flex flex-column justify-content-between" style="display:block;">
+                <img src="/static/dolar.png" alt="Ventas" style="height: 120px; width: 100%; object-fit: contain; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--clr-green));">
+                <h2 class="erp-card-header mt-3">Ventas</h2>
             </a>
         </div>
 
-        <!-- Reportes -->
-        <div class="col-md-4">
-            <a href="{% url 'reportes:inicio' %}" class="erp-card-btn">
-                <div class="card-icon">📈</div>
-                <h2 class="card-title">Reportes</h2>
-                <p class="card-desc">Análisis de mercado exclusivo</p>
+        <!-- Reportes (amongus.png) — Mantiene su imagen grande pero la tarjeta es del mismo tamaño -->
+        <div class="col-md-4 d-flex">
+            <a href="{% url 'reportes:inicio' %}" class="erp-card text-center text-decoration-none w-100 d-flex flex-column justify-content-between" style="display:block;">
+                <img src="/static/amongus.png" alt="Reportes" style="height: 180px; width: 100%; object-fit: contain; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--clr-purple));">
+                <h2 class="erp-card-header mt-3">Reportes</h2>
             </a>
         </div>
 
     </div>
 </div>
+
+<!-- ESTILOS PARA EL EFECTO DE LEVITACIÓN -->
+<style>
+    @keyframes levitar {
+        0% { transform: translateY(0px) rotate(-2deg); }
+        50% { transform: translateY(-15px) rotate(-2deg); }
+        100% { transform: translateY(0px) rotate(-2deg); }
+    }
+    .flotar {
+        animation: levitar 4s ease-in-out infinite;
+    }
+</style>
 {% endblock %}

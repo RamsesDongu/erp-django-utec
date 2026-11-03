@@ -235,8 +235,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # ── ALLAUTH: configuración para desarrollo académico ──────────────────────
-ACCOUNT_LOGIN_METHODS          = {'username'}   # login por username
-ACCOUNT_EMAIL_REQUIRED         = False          # no obligar correo
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION     = 'none'         # no enviar email de verificación
 ACCOUNT_LOGOUT_ON_GET          = True           # logout sin confirmar (dev)
 ACCOUNT_SESSION_REMEMBER       = True           # recordar sesión

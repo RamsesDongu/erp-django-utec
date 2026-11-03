@@ -2,12 +2,15 @@
 """Configuración del panel admin para la app productos — W11."""
 from django.contrib import admin
 from django.utils.html import format_html
+
 from .models import Categoria, Producto
+
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
     list_display  = ['pk', 'nombre', 'descripcion']
     search_fields = ['nombre']
+
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
