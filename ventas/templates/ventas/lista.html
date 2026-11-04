@@ -40,7 +40,6 @@
                         ${{ v.total }}
                     </td>
                     <td>
-                        <!-- Botón de PDF directo desde la lista -->
                         <a href="{% url 'ventas:pdf' v.pk %}" class="btn-erp-gold" style="padding: .2rem .6rem; font-size: .8rem;">
                             PDF
                         </a>
@@ -54,20 +53,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Paginación (si hay más de 20 ventas) -->
-        {% if is_paginated %}
-        <div style="display:flex; gap:.5rem; justify-content:center; margin-top:1.5rem;">
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn-erp-primary">&larr; Anterior</a>
-            {% endif %}
-            <span style="padding:.35rem .75rem; color: #666;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn-erp-primary">Siguiente &rarr;</a>
-            {% endif %}
-        </div>
-        {% endif %}
-
         {% else %}
         <div style="text-align: center; padding: 3rem;">
             <p style="color: #666; font-size: 1.2rem;">No hay ventas registradas aún.</p>
