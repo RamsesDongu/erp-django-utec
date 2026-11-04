@@ -1,81 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Venta #{{ venta.pk }}{% endblock %}
-{% block nav_ventas %}active{% endblock %}
+{% block title %}Venta #{{ venta.pk }} | Dongu's{% endblock %}
 
 {% block content %}
-<div class="erp-page-title">
-    <h2>💰 Venta #{{ venta.pk }}</h2>
-    {% if user.is_authenticated %}
-        <div class="ms-auto d-flex gap-2"> <!-- Contenedor para alinear botones a la derecha -->
-            <!-- BOTÓN DE PDF AGREGADO AQUÍ -->
-            <a href="{% url 'ventas:pdf' venta.pk %}" class="btn-erp-gold" style="background: linear-gradient(135deg, #39FF14 0%, #2ecc71 100%); color: #000; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">
-                <i class="fas fa-file-pdf"></i> Descargar PDF
-            </a>
-            
-            <!-- Botón de eliminar existente -->
-            <a href="{% url 'ventas:eliminar' venta.pk %}" class="btn-erp-danger">
-                Eliminar venta
-            </a>
-        </div>
-    {% endif %}
-</div>
+<div style="position: relative; z-index: 1;">
+    <div class="d-flex align-items-center mb-4">
+        <h2 style="font-family:'Bangers', cursive; font-size: 3rem; color: var(--clr-green); text-shadow: 2px 2px 0 #000; margin: 0;">
+            VENTA #{{ venta.pk }}
+        </h2>
+        {% if user.is_authenticated %}
+            <div class="ms-auto d-flex gap-3">
+                <!-- BOTÓN DE PDF -->
+                <a href="{% url 'ventas:pdf' venta.pk %}" class="btn-erp-gold" style="background: linear-gradient(135deg, #39FF14 0%, #2ecc71 100%); color: #000; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </a>
+                <a href="{% url 'ventas:eliminar' venta.pk %}" class="btn-erp-danger">Eliminar</a>
+            </div>
+        {% endif %}
+    </div>
 
-<div class="erp-card">
-    <div class="erp-card-header">Encabezado</div>
-    <dl class="row" style="margin:0;">
-        <dt class="col-sm-3">Cliente</dt>
-        <dd class="col-sm-9">
-            <a href="{% url 'clientes:detalle' venta.cliente.pk %}"
-               style="color:var(--clr-royal);">{{ venta.cliente }}</a>
-        </dd>
-        <dt class="col-sm-3">Fecha</dt>
-        <dd class="col-sm-9">{{ venta.fecha|date:"d/m/Y H:i" }}</dd>
-    </dl>
-</div>
+    <div class="erp-card mb-4">
+        <div class="erp-card-header">Datos de la Venta</div>
+        <dl class="row mt-3">
+            <dt class="col-sm-3" style="color: var(--clr-purple);">Cliente</dt>
+            <dd class="col-sm-9">
+                <a href="{% url 'clientes:detalle' venta.cliente.pk %}" style="color: var(--clr-green);">
+                    {{ venta.cliente }}
+                </a>
+            </dd>
 
-<div class="erp-card">
-    <div class="erp-card-header">Líneas de detalle</div>
-    <table class="erp-table">
-        <thead>
-            <tr>
-                <th>Producto</th><th>Precio unit.</th>
-                <th>Cantidad</th><th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in venta.detalles.all %}
-            <tr>
-                <td>
-                    <a href="{% url 'productos:detalle' d.producto.pk %}"
-                       style="color:var(--clr-royal);">
-                        {{ d.producto.nombre }}
-                    </a>
-                </td>
-                <td>${{ d.precio_unitario }}</td>
-                <td>{{ d.cantidad }}</td>
-                <td style="font-weight:600;">${{ d.subtotal }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" style="text-align:center;
-                    color:var(--clr-muted);">Sin líneas de detalle.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3" style="text-align:right;
-                    padding:.65rem 1rem;font-weight:600;">
-                    Total:
-                </td>
-                <td style="padding:.65rem 1rem;font-weight:700;
-                    color:var(--clr-gold);">
-                    ${{ venta.total }}
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+            <dt class="col-sm-3" style="color: var(--clr-purple);">Fecha</dt>
+            <dd class="col-sm-9">{{ venta.fecha|date:"d/m/Y H:i" }}</dd>
 
-<a href="{% url 'ventas:lista' %}" class="btn-erp-primary">← Volver</a>
+            <dt class="col-sm-3" style="color: var(--clr-purple);">Total</dt>
+            <dd class="col-sm-9" style="font-size: 1.5rem; font-weight: bold; color: var(--clr-green);">
+                ${{ venta.total }}
+            </dd>
+        </dl>
+    </div>
+
+    <div class="erp-card">
+        <div class="erp-card-header">Líneas de Detalle</div>
+        <table class="erp-table mt-3">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio unit.</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in venta.detalles.all %}
+                <tr>
+                    <td>
+                        <a href="{% url 'productos:detalle' d.producto.pk %}" style="color: var(--clr-white);">
+                            {{ d.producto.nombre }}
+                        </a>
+                    </td>
+                    <td>${{ d.precio_unitario }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td style="color: var(--clr-green); font-weight: bold;">${{ d.subtotal }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; color: #666;">Sin líneas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{% url 'ventas:lista' %}" class="btn-erp-primary mt-4 d-inline-block">&larr; Volver a Ventas</a>
+</div>
 {% endblock %}
