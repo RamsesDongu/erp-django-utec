@@ -1,31 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Editar — {{ producto.nombre }}{% endblock %}
-{% block nav_productos %}active{% endblock %}
+{% block title %}Editar {{ producto.nombre }} | Dongu's{% endblock %}
 
 {% block content %}
-<div class="erp-page-title">
-    <h2>✏️ Editar: {{ producto.nombre }}</h2>
-</div>
+<div style="position: relative; z-index: 1; max-width: 700px; margin: 0 auto;">
+    
+    <div class="d-flex align-items-center mb-4">
+        <h2 style="font-family:'Bangers', cursive; font-size: 3rem; color: var(--clr-purple); text-shadow: 2px 2px 0 #000; margin: 0;">
+            EDITAR PRODUCTO
+        </h2>
+    </div>
 
-<div class="erp-card" style="max-width:640px;">
-    <div class="erp-card-header">Modificar datos</div>
-    <form method="post" style="margin-top:.5rem;">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="mb-4">
-            <label class="erp-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                {% for e in field.errors %}
-                    <p style="color:var(--clr-danger);font-size:.82rem;margin:.25rem 0 0;">{{ e }}</p>
-                {% endfor %}
+    <div class="erp-card">
+        <div class="erp-card-header">Modificar: {{ producto.nombre }}</div>
+        
+        <!-- ¡EL ENCTYPE ES OBLIGATORIO PARA SUBIR IMÁGENES! -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="mb-4">
+                <label class="erp-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    {% for e in field.errors %}
+                        <p style="color: #ff4444; font-size: .85rem; margin-top: .5rem;">{{ e }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Mostrar la imagen actual si existe -->
+            {% if producto.imagen %}
+            <div class="mb-4">
+                <label class="erp-label">Imagen actual</label>
+                <div>
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" style="max-height: 150px; border-radius: 8px; border: 2px solid #333;">
+                </div>
+            </div>
             {% endif %}
-        </div>
-        {% endfor %}
-        <div class="d-flex gap-2 mt-3">
-            <button type="submit" class="btn-erp-gold">Actualizar</button>
-            <a href="{% url 'productos:detalle' producto.pk %}" class="btn-erp-primary">Cancelar</a>
-        </div>
-    </form>
+
+            <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px dashed #444;">
+                <button type="submit" class="btn-erp-gold">Actualizar Producto</button>
+                <a href="{% url 'productos:detalle' producto.pk %}" class="btn-erp-primary">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

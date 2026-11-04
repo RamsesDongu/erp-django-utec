@@ -1,5 +1,5 @@
 # productos/forms.py
-"""Formularios de la app productos — W08."""
+"""Formularios de la app productos — W11/W12."""
 from django import forms
 
 from .models import Producto
@@ -8,14 +8,14 @@ from .models import Producto
 class ProductoForm(forms.ModelForm):
     """Formulario para crear y editar productos.
 
-    Excluye: id, creado (auto-generados).
-    Incluye: activo (admin puede activar/desactivar).
+    W11: incluye campo imagen con widget de archivo.
+    El template debe tener enctype="multipart/form-data".
     """
 
     class Meta:
         model  = Producto
         fields = ['nombre', 'precio', 'stock', 'categoria',
-                  'proveedor', 'activo']
+                  'proveedor', 'activo', 'imagen']   # ← Agregamos 'imagen'
         widgets = {
             'nombre':    forms.TextInput(
                 attrs={'class': 'erp-input',
@@ -27,11 +27,11 @@ class ProductoForm(forms.ModelForm):
             'stock':     forms.NumberInput(
                 attrs={'class': 'erp-input', 'min': '0'}
             ),
-            'categoria': forms.Select(
-                attrs={'class': 'erp-input'}
-            ),
-            'proveedor': forms.Select(
-                attrs={'class': 'erp-input'}
+            'categoria': forms.Select(attrs={'class': 'erp-input'}),
+            'proveedor': forms.Select(attrs={'class': 'erp-input'}),
+            'imagen':    forms.ClearableFileInput(
+                attrs={'class': 'erp-input', 'style': 'padding-top: 10px;',
+                       'accept': 'image/jpeg,image/png,image/webp'}
             ),
         }
         labels = {
@@ -41,4 +41,5 @@ class ProductoForm(forms.ModelForm):
             'categoria': 'Categoría',
             'proveedor': 'Proveedor',
             'activo':    'Activo',
+            'imagen':    'Imagen del producto',
         }
