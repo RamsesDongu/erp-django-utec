@@ -52,6 +52,8 @@
             justify-content: flex-start;
             align-items: center;
             backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
         .brand-logo {
             font-family: 'Bangers', cursive;
@@ -62,6 +64,8 @@
             letter-spacing: 2px;
             text-decoration: none;
         }
+        
+        /* MENÚ Y ENLACES */
         .nav-link-discreto {
             color: #888;
             text-decoration: none;
@@ -201,19 +205,25 @@
 
     <!-- BARRA SUPERIOR DISCRETA -->
     <header class="top-bar">
-        <a href="/">
+        <a href="/" style="text-decoration: none;">
             <h1 class="brand-logo">Dongu's</h1>
         </a>
 
         <!-- MENÚ DISCRETO (Solo se muestra si NO estamos en la página de inicio) -->
         {% if request.path != '/' %}
-        <nav class="d-flex gap-4 ms-5" style="align-items: center;">
+        <nav class="d-flex gap-4 ms-5 align-items-center">
             <a href="/" class="nav-link-discreto">Inicio</a>
-            <a href="{% url 'productos:lista' %}" class="nav-link-discreto">Catálogo</a>
+            <a href="{% url 'catalogo:catalogo' %}" class="nav-link-discreto">Tienda</a>
+            <a href="{% url 'productos:lista' %}" class="nav-link-discreto">Catálogo Admin</a>
             <a href="{% url 'clientes:lista' %}" class="nav-link-discreto">Clientes</a>
             <a href="{% url 'proveedores:lista' %}" class="nav-link-discreto">Proveedores</a>
             <a href="{% url 'ventas:lista' %}" class="nav-link-discreto">Ventas</a>
             <a href="{% url 'reportes:inicio' %}" class="nav-link-discreto">Reportes</a>
+            
+            <!-- CONTADOR DEL CARRITO -->
+            <a href="{% url 'catalogo:carrito' %}" class="nav-link-discreto" style="color: var(--clr-green); position: relative; margin-left: 1rem;">
+                🛒 Carrito ({{ carrito_total_items }})
+            </a>
         </nav>
         {% endif %}
 
@@ -234,7 +244,7 @@
     </header>
 
     <!-- CONTENIDO -->
-    <main>
+    <main class="main-container">
         {% if messages %}
         <div class="container mt-3">
             {% for m in messages %}

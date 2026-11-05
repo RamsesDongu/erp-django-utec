@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Catálogo | Dongu's{% endblock %}
+
+{% block content %}
+<div style="position: relative; z-index: 1;">
+    
+    <div class="d-flex align-items-center mb-4">
+        <h2 style="font-family:'Bangers', cursive; font-size: 3rem; color: var(--clr-green); text-shadow: 2px 2px 0 #000; margin: 0;">
+            CATÁLOGO
+        </h2>
+        <span style="margin-left: 1.5rem; color: #666; font-size: .95rem;">
+            {{ page_obj.paginator.count }} producto(s) disponibles
+        </span>
+        <a href="{% url 'catalogo:carrito' %}" class="btn-erp-gold ms-auto" style="position:relative;">
+            🛍️ Carrito
+            {% if carrito_total_items > 0 %}
+            <span style="position:absolute; top:-10px; right:-10px; background:#ff4444; color:#fff; border-radius:50%; width:24px; height:24px; font-size:.75rem; display:flex; align-items:center; justify-content:center; font-weight:bold; border: 2px solid #000;">
+                {{ carrito_total_items }}
+            </span>
+            {% endif %}
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="erp-card mb-4">
+        <div class="erp-card-header">BUSCAR Y FILTRAR</div>
+        <form method="get" class="row g-3 mt-2">
+            <div class="col-md-4">
+                <label class="erp-label">Buscar por nombre</label>
+                {{ filtro.form.nombre }}
+            </div>
+            <div class="col-md-3">
+                <label class="erp-label">Categoría</label>
+                {{ filtro.form.categoria }}
+            </div>
+            <div class="col-md-2">
+                <label class="erp-label">Precio mín.</label>
+                {{ filtro.form.precio_min }}
+            </div>
+            <div class="col-md-2">
+                <label class="erp-label">Precio máx.</label>
+                {{ filtro.form.precio_max }}
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn-erp-gold w-100" style="padding: .6rem .5rem;">OK</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Productos -->
+    {% if productos %}
+    <div class="row g-4">
+        {% for prod in productos %}
+        <div class="col-md-3 col-sm-6">
+            <div class="erp-card" style="height:100%; display:flex; flex-direction:column; padding: 0; overflow: hidden;">
+                
+                <!-- Imagen -->
+                {% if prod.imagen %}
+                    <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" style="width:100%; height:180px; object-fit:cover;">
+                {% else %}
+                    <div style="width:100%; height:180px; background:#222; display:flex; align-items:center; justify-content:center; font-size:3rem;">🏎️</div>
+                {% endif %}
+
+                <!-- Datos -->
+                <div style="padding: 1.5rem; flex:1; display:flex; flex-direction:column;">
+                    <p style="font-weight:600; color: var(--clr-white); margin:0 0 .2rem; font-size:1.1rem;">{{ prod.nombre }}</p>
+                    <p style="font-size:.85rem; color: var(--clr-purple); margin:0;">{{ prod.categoria }}</p>
+                    
+                    <div class="mt-auto pt-3">
+                        <p style="font-size:1.4rem; font-weight:900; color: var(--clr-green); margin:0;">${{ prod.precio }}</p>
+                        <p style="font-size:.8rem; color: #888; margin: .2rem 0 .8rem;">Stock: {{ prod.stock }}</p>
+                        
+                        <form method="post" action="{% url 'catalogo:agregar' prod.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="cantidad" value="1">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn-erp-gold w-100" style="padding: .5rem;">+ Agregar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <div class="d-flex justify-content-center gap-2 mt-5">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn-erp-primary">&larr; Anterior</a>
+        {% endif %}
+        <span style="padding:.5rem 1rem; color:#888;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn-erp-primary">Siguiente &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="erp-card text-center p-5">
+        <p style="color:#888; font-size:1.2rem;">No se encontraron productos con los filtros seleccionados.</p>
+        <a href="{% url 'catalogo:catalogo' %}" class="btn-erp-primary mt-3">Ver todos los productos</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

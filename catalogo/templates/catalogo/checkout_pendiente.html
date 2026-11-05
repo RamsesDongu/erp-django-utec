@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Checkout en Construcción{% endblock %}
+
+{% block content %}
+<div class="erp-card text-center" style="max-width:500px; margin: 5rem auto; position:relative; z-index:1;">
+    <div class="erp-card-header">💳 PASARELA DE PAGO</div>
+    <p style="color:#888; font-size:1.2rem; margin: 2rem 0;">
+        El sistema de pagos con tarjeta (Stripe) se conectará en la próxima semana (W14).
+    </p>
+    <a href="{% url 'catalogo:carrito' %}" class="btn-erp-primary">&larr; Volver al carrito</a>
+</div>
+{% endblock %}
