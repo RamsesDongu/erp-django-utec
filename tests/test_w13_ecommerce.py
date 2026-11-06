@@ -1,14 +1,4 @@
-"""Suite de pruebas W13 — Catálogo público y carrito de compras.
-
-Verifica: catálogo sin auth, filtros, ciclo completo del carrito.
-
-Ejecutar con:
-    python manage.py test tests.test_w13_ecommerce --verbosity=2
-
-Resultado esperado:
-    Ran 9 tests in X.XXXs
-    OK
-"""
+"""Suite de pruebas W13 — Catálogo público y carrito de compras."""
 from decimal import Decimal
 
 from django.test import TestCase

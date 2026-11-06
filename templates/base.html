@@ -243,6 +243,18 @@
         </div>
     </header>
 
+    <!-- REPRODUCTOR DE MÚSICA FLOTANTE -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+        <audio id="bg-music" loop>
+            <source src="/static/musica.mp3" type="audio/mpeg">
+        </audio>
+        <button id="music-toggle" onclick="toggleMusic()" 
+                style="background: var(--clr-green); color: #000; border: 3px solid #000; border-radius: 50%; width: 55px; height: 55px; font-size: 1.5rem; cursor: pointer; box-shadow: 0 0 20px rgba(57, 255, 20, 0.6); transition: all 0.3s; display: flex; align-items: center; justify-content: center;"
+                title="Música de fondo">
+            🎵
+        </button>
+    </div>
+
     <!-- CONTENIDO -->
     <main class="main-container">
         {% if messages %}
@@ -260,5 +272,65 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SCRIPT DE MÚSICA PERSISTENTE -->
+    <script>
+        const audio = document.getElementById('bg-music');
+        const btn   = document.getElementById('music-toggle');
+
+        // Configuración inicial
+        audio.volume = 0.7; // Volumen al 70%
+
+        // Recuperar estado de la memoria del navegador
+        const musicWasPlaying = localStorage.getItem('musicPlaying') === 'true';
+        const savedTime = parseFloat(localStorage.getItem('musicTime')) || 0;
+
+        // Si había tiempo guardado, lo aplicamos al audio
+        if (savedTime > 0) {
+            audio.currentTime = savedTime;
+        }
+
+        // Función para actualizar el aspecto del botón
+        function updateButton(isPlaying) {
+            if (isPlaying) {
+                btn.innerHTML = '🔊';
+                btn.style.opacity = '1';
+            } else {
+                btn.innerHTML = '🎵';
+                btn.style.opacity = '0.6';
+            }
+        }
+
+        // Función para alternar la música
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                localStorage.setItem('musicPlaying', 'true');
+                updateButton(true);
+            } else {
+                audio.pause();
+                localStorage.setItem('musicPlaying', 'false');
+                updateButton(false);
+            }
+        }
+
+        // Cada vez que el audio avanza, guardamos el segundo actual
+        audio.addEventListener('timeupdate', () => {
+            localStorage.setItem('musicTime', audio.currentTime);
+        });
+
+        // Al cargar la página, si antes estaba sonando, intentamos reproducir
+        if (musicWasPlaying) {
+            audio.play().then(() => {
+                updateButton(true);
+            }).catch(() => {
+                // El navegador bloqueó el autoplay.
+                updateButton(false);
+                localStorage.setItem('musicPlaying', 'false');
+            });
+        } else {
+            updateButton(false);
+        }
+    </script>
 </body>
 </html>
