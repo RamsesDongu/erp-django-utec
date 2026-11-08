@@ -51,6 +51,9 @@ actualizando automáticamente el estado del pedido.
 
 ---
 
+
+---
+
 ## Sprint Backlog — actualización W13
 
 | Tarea | Estado |
