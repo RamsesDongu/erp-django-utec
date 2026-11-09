@@ -197,6 +197,7 @@
         .badge-erp-active { background: rgba(57, 255, 20, 0.1); color: var(--clr-green); border: 1px solid var(--clr-green); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; }
         .badge-erp-inactive { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold;}
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -278,19 +279,13 @@
         const audio = document.getElementById('bg-music');
         const btn   = document.getElementById('music-toggle');
 
-        // Configuración inicial
-        audio.volume = 0.7; // Volumen al 70%
+        audio.volume = 0.7;
 
-        // Recuperar estado de la memoria del navegador
         const musicWasPlaying = localStorage.getItem('musicPlaying') === 'true';
         const savedTime = parseFloat(localStorage.getItem('musicTime')) || 0;
 
-        // Si había tiempo guardado, lo aplicamos al audio
-        if (savedTime > 0) {
-            audio.currentTime = savedTime;
-        }
+        if (savedTime > 0) { audio.currentTime = savedTime; }
 
-        // Función para actualizar el aspecto del botón
         function updateButton(isPlaying) {
             if (isPlaying) {
                 btn.innerHTML = '🔊';
@@ -301,7 +296,6 @@
             }
         }
 
-        // Función para alternar la música
         function toggleMusic() {
             if (audio.paused) {
                 audio.play();
@@ -314,23 +308,20 @@
             }
         }
 
-        // Cada vez que el audio avanza, guardamos el segundo actual
         audio.addEventListener('timeupdate', () => {
             localStorage.setItem('musicTime', audio.currentTime);
         });
 
-        // Al cargar la página, si antes estaba sonando, intentamos reproducir
         if (musicWasPlaying) {
-            audio.play().then(() => {
-                updateButton(true);
-            }).catch(() => {
-                // El navegador bloqueó el autoplay.
-                updateButton(false);
-                localStorage.setItem('musicPlaying', 'false');
+            audio.play().then(() => { updateButton(true); }).catch(() => {
+                updateButton(false); localStorage.setItem('musicPlaying', 'false');
             });
         } else {
             updateButton(false);
         }
     </script>
+
+    <!-- ¡ESTA ES LA LÍNEA QUE FALTABA PARA QUE STRIPE FUNCIONE! -->
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
