@@ -72,3 +72,20 @@ actualizando automáticamente el estado del pedido.
 | Tests con unittest.mock.patch (10 tests) | ✅ W14 |
 | Webhooks + actualizar estado pedido a 'pagado' | ⏳ W15 |
 | Descontar stock al confirmar pago | ⏳ W15 |
+
+
+---
+
+## Sprint 4 — Estado final W15
+
+| HU | Estado | Pts |
+|---|---|---|
+| HU-E5-01 a HU-E5-08 | ✅ Completadas | 26/26 |
+
+## Hito M5 — ALCANZADO ✅
+- Catálogo: /catalogo/ → 200 sin auth con filtros
+- Carrito: agregar/remover/actualizar/vaciar funcional
+- Stripe: tarjeta 4242 → pago exitoso → pedido 'pagado'
+- Webhook: payment_intent.succeeded → stock decrementado
+- Tests: Ran 157 tests → OK
+- Fecha: 08/11/2026
