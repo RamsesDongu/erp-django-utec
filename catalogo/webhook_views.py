@@ -4,9 +4,12 @@
 Verificación de seguridad:
     Stripe firma cada evento con STRIPE_WEBHOOK_SECRET.
     stripe.Webhook.construct_event() verifica la firma.
+    Si la firma es inválida → 400 (Stripe no reintenta).
+    Si la firma es válida → procesar el evento → 200.
 
 Eventos manejados:
-    payment_intent.succeeded      → Pedido.estado = 'pagado' + descontar stock
+    payment_intent.succeeded     → Pedido.estado = 'pagado'
+                                    Descontar stock de productos
     payment_intent.payment_failed → Pedido.estado = 'cancelado'
 """
 import logging
@@ -24,31 +27,17 @@ from ventas.models    import Pedido
 logger = logging.getLogger(__name__)
 
 
-def _a_dict(objeto):
-    """Convierte un objeto Stripe (PaymentIntent, Event, etc.) a dict.
-
-    Las versiones nuevas de stripe-python devuelven objetos en lugar de
-    diccionarios. Este helper normaliza a dict para poder usar .get().
-
-    Args:
-        objeto: objeto Stripe, dict, o cualquier cosa.
-
-    Returns:
-        dict: representación plana del objeto.
-    """
-    if objeto is None:
-        return {}
-    if isinstance(objeto, dict):
-        return objeto
-    if hasattr(objeto, 'to_dict'):
-        return objeto.to_dict()
-    return dict(objeto)
-
-
 @csrf_exempt
 @require_POST
 def stripe_webhook(request) -> HttpResponse:
-    """Recibe y procesa eventos de Stripe."""
+    """Recibe y procesa eventos de Stripe.
+
+    Flujo:
+        1. Leer payload crudo (bytes) y header de firma.
+        2. Verificar firma con STRIPE_WEBHOOK_SECRET.
+        3. Despachar al handler del tipo de evento.
+        4. Retornar 200 (éxito) o 400 (firma inválida).
+    """
     payload    = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
 
@@ -66,21 +55,20 @@ def stripe_webhook(request) -> HttpResponse:
         logger.warning('Webhook: firma inválida — posible ataque.')
         return HttpResponse('Firma inválida.', status=400)
 
-    # ── 2. Convertir a dict para acceso seguro ─────────────────────────────
-    event_dict = _a_dict(event)
-    tipo       = event_dict.get('type', '')
-    pi_dict    = _a_dict(
-        event_dict.get('data', {}).get('object', {})
-    )
+    # stripe >= 15 devuelve StripeObject, que ya NO es un dict
+    # (no tiene .get()). Lo convertimos a dict nativo de Python.
+    if hasattr(event, 'to_dict'):
+        event = event.to_dict()
 
+    # ── 2. Despachar por tipo de evento ────────────────────────────────────
+    tipo = event['type']
     logger.info(f'Webhook recibido: {tipo}')
 
-    # ── 3. Despachar por tipo ──────────────────────────────────────────────
     if tipo == 'payment_intent.succeeded':
-        _manejar_pago_exitoso(pi_dict)
+        _manejar_pago_exitoso(event['data']['object'])
 
     elif tipo == 'payment_intent.payment_failed':
-        _manejar_pago_fallido(pi_dict)
+        _manejar_pago_fallido(event['data']['object'])
 
     else:
         logger.debug(f'Evento ignorado: {tipo}')
@@ -156,7 +144,7 @@ def _extraer_pedido_id(payment_intent: dict) -> int | None:
 
 
 def _descontar_stock(pedido) -> None:
-    """Descuenta el stock de los productos del pedido (atómico con F())."""
+    """Descuenta el stock usando F() para actualización atómica."""
     items = pedido.items_snapshot or []
 
     for item in items:
