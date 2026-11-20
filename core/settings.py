@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'anymail',                      # ← AGREGAR (para Resend)
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -121,6 +122,28 @@ REST_FRAMEWORK = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── CORREO ELECTRÓNICO (RESEND) ───────────────────────────────────────────
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'
+)
+
+DEFAULT_FROM_EMAIL = env(
+    'DEFAULT_FROM_EMAIL',
+    default='ERP Django <onboarding@resend.dev>'
+)
+
+EMAIL_SUBJECT_PREFIX = '[ERP Django] '
+
+ADMINS = [
+    ('Admin ERP', env('ADMIN_EMAIL', default='admin@erp-django.com')),
+]
+
+RESEND_API_KEY = env('RESEND_API_KEY', default='')
+ANYMAIL = {
+    'RESEND_API_KEY': RESEND_API_KEY,
+}
 
 # ── JAZZMIN — Personalización del admin ───────────────────────────────────
 JAZZMIN_SETTINGS = {
@@ -228,7 +251,6 @@ STRIPE_WEBHOOK_SECRET  = env('STRIPE_WEBHOOK_SECRET', default='whsec_placeholder
 CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
 
-# SSL para Upstash (rediss://) — el objeto ssl.CERT_NONE, NO el string
 CELERY_BROKER_USE_SSL = {
     'ssl_cert_reqs': ssl.CERT_NONE,
 }
@@ -249,9 +271,7 @@ CELERY_TASK_DEFAULT_QUEUE = 'erp_django'
 CELERY_TASK_ALWAYS_EAGER         = False
 CELERY_TASK_EAGER_PROPAGATES     = True
 
-# ── MODO TEST: ejecutar tareas síncronamente sin Redis ────────────────────
-# Cuando se ejecuta `python manage.py test`, Celery no intentará conectarse
-# a Upstash; las tareas se ejecutan en el mismo proceso (eager mode).
+# ── MODO TEST ─────────────────────────────────────────────────────────────
 if 'test' in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True

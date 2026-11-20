@@ -85,3 +85,6 @@ LOGGING = {
         },
     },
 }
+
+# En producción: usar Resend via anymail
+EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
