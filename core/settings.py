@@ -140,6 +140,14 @@ ADMINS = [
     ('Admin ERP', env('ADMIN_EMAIL', default='admin@erp-django.com')),
 ]
 
+# URL pública del sitio para los enlaces de los correos (las tareas
+# Celery no tienen request → no hay build_absolute_uri()).
+# Render define RENDER_EXTERNAL_URL automáticamente en cada servicio.
+SITE_URL = env(
+    'SITE_URL',
+    default=env('RENDER_EXTERNAL_URL', default='http://127.0.0.1:8000')
+).rstrip('/')
+
 RESEND_API_KEY = env('RESEND_API_KEY', default='')
 ANYMAIL = {
     'RESEND_API_KEY': RESEND_API_KEY,
