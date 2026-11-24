@@ -223,6 +223,7 @@ def checkout(request):
 # ── PAGO EXITOSO (W16: dispara tarea async) ───────────────────────────────
 
 def pago_exitoso(request, pedido_id: int):
+<<<<<<< HEAD
     """Vista de confirmación post-pago exitoso.
 
     Vacía el carrito de la sesión y muestra el número de pedido.
@@ -233,16 +234,28 @@ def pago_exitoso(request, pedido_id: int):
     cierre el navegador y que es idempotente → un solo correo por pedido.
     """
     from django.shortcuts import get_object_or_404
+=======
+>>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
     pedido = get_object_or_404(Pedido, pk=pedido_id)
 
     # Vaciar el carrito al confirmar el pago
     _guardar_carrito(request, {})
 
+<<<<<<< HEAD
     messages.success(
         request,
         f'¡Pago exitoso! Tu pedido {pedido.numero_pedido} '
         f'está confirmado. Total: ${pedido.total_pagado}. '
         f'Recibirás un correo de confirmación pronto.'
+=======
+    # Disparar la tarea asíncrona (no bloquea la respuesta HTTP)
+    enviar_confirmacion_pedido.delay(pedido.pk)
+
+    messages.success(
+        request,
+        f'¡Pago exitoso! Tu pedido {pedido.numero_pedido} '
+        f'está confirmado. Recibirás un correo de confirmación pronto.'
+>>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
     )
 
     return render(request, 'catalogo/pago_exitoso.html', {
