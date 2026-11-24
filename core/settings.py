@@ -1,9 +1,5 @@
 # core/settings.py
 import os
-<<<<<<< HEAD
-=======
-import ssl
->>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
 import sys
 
 import environ
@@ -36,11 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-<<<<<<< HEAD
-    'anymail',                      # ← Para Resend
-=======
     'anymail',                      # ← AGREGAR (para Resend)
->>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -255,9 +247,6 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_placehol
 STRIPE_WEBHOOK_SECRET  = env('STRIPE_WEBHOOK_SECRET', default='whsec_placeholder')
 
 # ── CELERY — Cola de tareas asíncronas ────────────────────────────────────
-<<<<<<< HEAD
-# Si REDIS_URL está definida (Render), usa Redis.
-# Si está vacía (Local sin Docker), usa modo EAGER (memoria).
 REDIS_URL = env('REDIS_URL', default='')
 
 if REDIS_URL:
@@ -269,20 +258,6 @@ else:
     CELERY_RESULT_BACKEND    = 'cache+memory://'
     CELERY_TASK_ALWAYS_EAGER = True
 
-# ⚠️ IMPORTANTE: NO usar CELERY_BROKER_USE_SSL. 
-# La URL rediss:// ya configura el SSL automáticamente.
-=======
-CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
-
-CELERY_BROKER_USE_SSL = {
-    'ssl_cert_reqs': ssl.CERT_NONE,
-}
-CELERY_REDIS_BACKEND_USE_SSL = {
-    'ssl_cert_reqs': ssl.CERT_NONE,
-}
->>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
-
 CELERY_ACCEPT_CONTENT    = ['json']
 CELERY_TASK_SERIALIZER   = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -292,13 +267,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_TASK_SOFT_TIME_LIMIT = 300
 CELERY_TASK_TIME_LIMIT       = 360
 CELERY_TASK_DEFAULT_QUEUE = 'erp_django'
-<<<<<<< HEAD
-CELERY_TASK_EAGER_PROPAGATES = True
-=======
-
-CELERY_TASK_ALWAYS_EAGER         = False
 CELERY_TASK_EAGER_PROPAGATES     = True
->>>>>>> 82423659d0811009fbaf01f0dab7df27efda8732
 
 # ── MODO TEST ─────────────────────────────────────────────────────────────
 if 'test' in sys.argv:
