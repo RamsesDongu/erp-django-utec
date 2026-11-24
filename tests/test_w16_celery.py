@@ -77,7 +77,7 @@ class EnviarConfirmacionTareaTest(TestCase):
 
 
 class TareaInvocadaDesdeVistaTest(TestCase):
-    """Verifica que las vistas invocan las tareas con .delay()."""
+    """Verifica qué vistas encolan la tarea con .delay()."""
 
     def setUp(self):
         ConfiguracionERP.get_instance()
@@ -91,14 +91,17 @@ class TareaInvocadaDesdeVistaTest(TestCase):
         )
         self.user = User.objects.create_user('viewer', password='pass')
 
-    @patch('catalogo.views.enviar_confirmacion_pedido.delay')
-    def test_pago_exitoso_llama_a_delay(self, mock_delay):
-        """pago_exitoso() debe llamar a .delay() con el pedido_id."""
+    # ── CORRECCIÓN W17: La vista ya no encola, el webhook es el único ──
+    @patch('ventas.tasks.enviar_confirmacion_pedido.delay')
+    def test_pago_exitoso_no_encola_tarea(self, mock_delay):
+        """pago_exitoso() NO encola: el webhook es el único disparo."""
         self.client.force_login(self.user)
-        self.client.get(
+        r = self.client.get(
             reverse('catalogo:pago_exitoso', args=[self.pedido.pk])
         )
-        mock_delay.assert_called_once_with(self.pedido.pk)
+        self.assertEqual(r.status_code, 200)
+        mock_delay.assert_not_called()
+    # ───────────────────────────────────────────────────────────────────
 
     @patch('catalogo.webhook_views.enviar_confirmacion_pedido.delay')
     @patch('catalogo.webhook_views.stripe.Webhook.construct_event')
