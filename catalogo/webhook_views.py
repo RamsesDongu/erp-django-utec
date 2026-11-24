@@ -68,8 +68,14 @@ def _manejar_pago_exitoso(payment_intent: dict) -> None:
         logger.info(f'Pedido {pedido.numero_pedido} actualizado a "pagado".')
         _descontar_stock(pedido)
 
-        # Disparar la tarea asíncrona de confirmación
-        enviar_confirmacion_pedido.delay(pedido.pk)
+        # FIX: Proteger el webhook si Redis falla para que Stripe reciba 200
+        try:
+            enviar_confirmacion_pedido.delay(pedido.pk)
+        except Exception as e:
+            logger.exception(
+                f'Webhook: No se pudo encolar la confirmación del pedido '
+                f'{pedido.numero_pedido} (¿Redis disponible?): {e}'
+            )
     else:
         logger.info(
             f'Pedido {pedido.numero_pedido} ya estaba pagado — '

@@ -1,5 +1,6 @@
 # core/settings.py
 import os
+import ssl
 import sys
 
 import environ
@@ -32,7 +33,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'anymail',                      # ← AGREGAR (para Resend)
+    'anymail',
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -44,7 +45,6 @@ INSTALLED_APPS = [
     'core',
     'catalogo',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -224,7 +224,7 @@ JAZZMIN_UI_TWEAKS = {
     },
 }
 
-# ── DJANGO SITES (requerido por allauth) ──────────────────────────────────
+# ── DJANGO SITES ──────────────────────────────────────────────────────────
 SITE_ID = 1
 
 # ── AUTHENTICATION BACKENDS ───────────────────────────────────────────────
@@ -253,6 +253,11 @@ if REDIS_URL:
     CELERY_BROKER_URL     = REDIS_URL
     CELERY_RESULT_BACKEND = REDIS_URL
     CELERY_TASK_ALWAYS_EAGER = False
+
+    # FIX: Si la URL es segura (rediss://), le decimos a Celery que acepte el certificado
+    if REDIS_URL.startswith('rediss://'):
+        CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
+        CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
 else:
     CELERY_BROKER_URL        = 'memory://'
     CELERY_RESULT_BACKEND    = 'cache+memory://'
