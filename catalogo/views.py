@@ -1,5 +1,5 @@
 # catalogo/views.py
-"""Vistas del módulo de catálogo y carrito — W15."""
+"""Vistas del módulo de catálogo y carrito — W16."""
 import stripe
 from decimal import Decimal
 
@@ -11,6 +11,7 @@ from django.views.generic import ListView
 
 from productos.models import Producto
 from ventas.models import Pedido
+from ventas.tasks import enviar_confirmacion_pedido  # W16
 
 from .filters import ProductoFilter
 from .checkout_utils import (
@@ -53,20 +54,16 @@ class CatalogoView(ListView):
 # ── CARRITO ─────────────────────────────────────────────────────────────────
 
 def _obtener_carrito(request) -> dict:
-    """Obtiene el carrito de la sesión o crea uno vacío."""
     return request.session.get('carrito', {})
 
 
 def _guardar_carrito(request, carrito: dict) -> None:
-    """Guarda el carrito en la sesión y marca como modificado."""
     request.session['carrito']  = carrito
     request.session.modified    = True
 
 
 def ver_carrito(request):
-    """Muestra el contenido del carrito con el total calculado."""
     carrito = _obtener_carrito(request)
-
     items = []
     total = Decimal('0.00')
 
@@ -91,13 +88,11 @@ def ver_carrito(request):
 
 
 def agregar_al_carrito(request, producto_id: int):
-    """Agrega un producto al carrito o incrementa su cantidad."""
     if request.method != 'POST':
         return redirect('catalogo:catalogo')
 
     producto = get_object_or_404(Producto, pk=producto_id, activo=True)
     carrito  = _obtener_carrito(request)
-
     clave    = str(producto_id)
     cantidad = int(request.POST.get('cantidad', 1))
 
@@ -113,32 +108,25 @@ def agregar_al_carrito(request, producto_id: int):
 
     _guardar_carrito(request, carrito)
     messages.success(request, f'"{producto.nombre}" agregado al carrito.')
-
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER')
     return redirect(next_url or 'catalogo:catalogo')
 
 
 def remover_del_carrito(request, producto_id: int):
-    """Elimina un producto del carrito."""
     if request.method != 'POST':
         return redirect('catalogo:carrito')
-
     carrito = _obtener_carrito(request)
     clave   = str(producto_id)
-
-    nombre = carrito.get(clave, {}).get('nombre', 'Producto')
+    nombre  = carrito.get(clave, {}).get('nombre', 'Producto')
     carrito.pop(clave, None)
     _guardar_carrito(request, carrito)
-
     messages.warning(request, f'"{nombre}" eliminado del carrito.')
     return redirect('catalogo:carrito')
 
 
 def actualizar_cantidad(request, producto_id: int):
-    """Actualiza la cantidad de un producto en el carrito."""
     if request.method != 'POST':
         return redirect('catalogo:carrito')
-
     carrito  = _obtener_carrito(request)
     clave    = str(producto_id)
     cantidad = int(request.POST.get('cantidad', 1))
@@ -148,24 +136,21 @@ def actualizar_cantidad(request, producto_id: int):
             carrito[clave]['cantidad'] = cantidad
         else:
             carrito.pop(clave)
-
     _guardar_carrito(request, carrito)
     return redirect('catalogo:carrito')
 
 
 def vaciar_carrito(request):
-    """Elimina todos los productos del carrito."""
     if request.method == 'POST':
         _guardar_carrito(request, {})
         messages.info(request, 'Carrito vaciado.')
     return redirect('catalogo:carrito')
 
 
-# ── CHECKOUT Y PAGOS (W14/W15) ─────────────────────────────────────────────
+# ── CHECKOUT ──────────────────────────────────────────────────────────────
 
 @login_required
 def checkout(request):
-    """Proceso de pago: muestra resumen y crea PaymentIntent de Stripe."""
     carrito = _obtener_carrito(request)
     if not carrito:
         messages.warning(request, 'Tu carrito está vacío.')
@@ -177,19 +162,15 @@ def checkout(request):
 
     if request.method == 'POST':
         try:
-            # 1. Vincular usuario con Cliente del ERP
             cliente = obtener_o_crear_cliente(request.user)
+            numero  = generar_numero_pedido()
 
-            # 2. Crear el Pedido con snapshot del carrito
-            numero = generar_numero_pedido()
-
-            # Construir el snapshot: lista de dicts serializables
             snapshot = [
                 {
                     'producto_id': int(prod_id),
                     'nombre':      datos['nombre'],
                     'cantidad':    int(datos['cantidad']),
-                    'precio':      datos['precio'],   # ya es str
+                    'precio':      datos['precio'],
                 }
                 for prod_id, datos in carrito.items()
             ]
@@ -199,12 +180,10 @@ def checkout(request):
                 cliente        = cliente,
                 estado         = 'pendiente',
                 total_pagado   = totales['total'],
-                items_snapshot = snapshot,           # ← nuevo W15
+                items_snapshot = snapshot,
             )
 
-            # 3. Crear PaymentIntent en Stripe
             monto_centavos = int(totales['total'] * 100)
-
             intent = stripe.PaymentIntent.create(
                 amount          = monto_centavos,
                 currency        = 'mxn',
@@ -216,7 +195,6 @@ def checkout(request):
                 idempotency_key = f'pedido-{pedido.pk}',
             )
 
-            # 4. Retornar client_secret al template
             return render(request, 'catalogo/checkout.html', {
                 'carrito':         carrito,
                 'items':           items,
@@ -229,12 +207,10 @@ def checkout(request):
         except stripe.error.StripeError as exc:
             messages.error(request, f'Error al conectar con Stripe: {exc.user_message}')
             return redirect('catalogo:pago_error')
-
         except Exception as exc:
-            messages.error(request, f'Error inesperado en el proceso de pago: {exc}')
+            messages.error(request, f'Error inesperado: {exc}')
             return redirect('catalogo:pago_error')
 
-    # GET — solo mostrar resumen
     return render(request, 'catalogo/checkout.html', {
         'carrito':         carrito,
         'items':           items,
@@ -244,15 +220,29 @@ def checkout(request):
     })
 
 
+# ── PAGO EXITOSO (W16: dispara tarea async) ───────────────────────────────
+
 def pago_exitoso(request, pedido_id: int):
-    """Vista de confirmación post-pago exitoso."""
+    """Vista de confirmación post-pago exitoso.
+
+    Vacía el carrito de la sesión y muestra el número de pedido.
+    Stripe redirige aquí después de `stripe.confirmCardPayment` exitoso.
+
+    W16: esta vista NO encola la tarea de correo. La encola el webhook
+    (catalogo/webhook_views.py), que Stripe envía aunque el cliente
+    cierre el navegador y que es idempotente → un solo correo por pedido.
+    """
+    from django.shortcuts import get_object_or_404
     pedido = get_object_or_404(Pedido, pk=pedido_id)
+
+    # Vaciar el carrito al confirmar el pago
     _guardar_carrito(request, {})
-    
+
     messages.success(
         request,
         f'¡Pago exitoso! Tu pedido {pedido.numero_pedido} '
-        f'está confirmado. Total: ${pedido.total_pagado}'
+        f'está confirmado. Total: ${pedido.total_pagado}. '
+        f'Recibirás un correo de confirmación pronto.'
     )
 
     return render(request, 'catalogo/pago_exitoso.html', {
@@ -261,5 +251,4 @@ def pago_exitoso(request, pedido_id: int):
 
 
 def pago_error(request):
-    """Vista de error de pago."""
     return render(request, 'catalogo/pago_error.html')

@@ -2,8 +2,14 @@
 
 Usa unittest.mock.patch para simular stripe.Webhook.construct_event
 sin requerir claves reales ni conexión a Stripe.
+
+Ejecutar con:
+    python manage.py test tests.test_w15_webhooks --verbosity=2
+
+Resultado esperado:
+    Ran 8 tests in X.XXXs
+    OK
 """
-import json
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
@@ -17,7 +23,7 @@ from ventas.models      import Pedido
 
 
 def _crear_evento(tipo: str, pedido_id: int) -> dict:
-    """Construye un evento Stripe simulado para tests (en formato dict)."""
+    """Construye un evento Stripe simulado para tests."""
     return {
         'type': tipo,
         'data': {
@@ -50,7 +56,7 @@ def _crear_pedido_con_snapshot(cliente, producto, cantidad=2) -> Pedido:
     )
 
 
-class WebhookSecurityTest(TestCase):
+class WebhookSegurityTest(TestCase):
     """Tests de seguridad del endpoint webhook."""
 
     def test_get_rechazado_con_405(self):
@@ -119,7 +125,7 @@ class WebhookPagoExitosoTest(TestCase):
     @patch('catalogo.webhook_views.stripe.Webhook.construct_event')
     def test_payment_succeeded_descuenta_stock(self, mock_construct):
         """payment_intent.succeeded → stock decrementado en 2 unidades."""
-        stock_inicial = self.prod.stock   # 10
+        stock_inicial = self.prod.stock
         mock_construct.return_value = _crear_evento(
             'payment_intent.succeeded', self.pedido.pk
         )
@@ -149,7 +155,6 @@ class WebhookPagoExitosoTest(TestCase):
             HTTP_STRIPE_SIGNATURE='t=123,v1=ok'
         )
         self.prod.refresh_from_db()
-        # El stock no debe cambiar porque ya estaba pagado
         self.assertEqual(self.prod.stock, stock_antes)
 
 
@@ -179,3 +184,37 @@ class WebhookPagoFallidoTest(TestCase):
         self.assertEqual(r.status_code, 200)
         self.pedido.refresh_from_db()
         self.assertEqual(self.pedido.estado, 'cancelado')
+
+
+class WebhookStripeObjectTest(TestCase):
+    """Regresión: con stripe >= 15 el evento real es un StripeObject
+    (no un dict). Antes provocaba HTTP 500 en producción."""
+
+    def setUp(self):
+        cat         = Categoria.objects.create(nombre='Cat')
+        self.prod   = Producto.objects.create(
+            nombre='P', precio=Decimal('500.00'), stock=10, categoria=cat
+        )
+        cli         = Cliente.objects.create(nombre='C', correo='c3@t.com')
+        self.pedido = _crear_pedido_con_snapshot(cli, self.prod, cantidad=2)
+
+    @patch('catalogo.webhook_views.stripe.Webhook.construct_event')
+    def test_evento_stripe_object_real(self, mock_construct):
+        """StripeObject real → 200, pedido 'pagado' y stock descontado."""
+        import stripe
+        datos = _crear_evento('payment_intent.succeeded', self.pedido.pk)
+        datos['data']['object']['object'] = 'payment_intent'
+        datos.update({'id': 'evt_test', 'object': 'event'})
+        mock_construct.return_value = stripe.Event.construct_from(datos, 'sk_test')
+
+        r = self.client.post(
+            reverse('catalogo:webhook'),
+            data=b'{}',
+            content_type='application/json',
+            HTTP_STRIPE_SIGNATURE='t=123,v1=ok'
+        )
+        self.assertEqual(r.status_code, 200)
+        self.pedido.refresh_from_db()
+        self.prod.refresh_from_db()
+        self.assertEqual(self.pedido.estado, 'pagado')
+        self.assertEqual(self.prod.stock, 8)

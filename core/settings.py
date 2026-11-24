@@ -1,4 +1,7 @@
 # core/settings.py
+import os
+import sys
+
 import environ
 from pathlib import Path
 
@@ -13,7 +16,6 @@ DEBUG       = env('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 # ── Apps instaladas ───────────────────────────────────────────────────────
-# core/settings.py — actualizar INSTALLED_APPS (terceros):
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -29,7 +31,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',              # ← AGREGAR
+    'django_filters',
+    'anymail',                      # ← Para Resend
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -39,9 +42,8 @@ INSTALLED_APPS = [
     'reportes',
     'configuracion',
     'core',
-    'catalogo',                    # ← AGREGAR
+    'catalogo',
 ]
-
 
 
 MIDDLEWARE = [
@@ -53,7 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',   # ← agregar al final
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -70,7 +72,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # Context processor del carrito — W13
                 'catalogo.context_processors.carrito_info',
             ],
         },
@@ -92,18 +93,12 @@ USE_I18N      = True
 USE_TZ        = True
 
 # ── Archivos estáticos ────────────────────────────────────────────────────
-# settings.py — sección de estáticos (verificar, no duplicar)
 STATIC_URL  = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # destino de collectstatic
-
-# STATICFILES_DIRS ≠ STATIC_ROOT (error frecuente)
-STATICFILES_DIRS = [BASE_DIR / 'static']  # fuentes adicionales
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
 # ── Archivos media ────────────────────────────────────────────────────────
-# Archivos media (imágenes subidas por usuarios)
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -113,11 +108,10 @@ LOGIN_REDIRECT_URL  = '/productos/'
 LOGOUT_REDIRECT_URL = '/'
 
 # ── DRF ──────────────────────────────────────────────────────────────────
-# core/settings.py — reemplazar la configuración REST_FRAMEWORK de W01:
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',   # para el navegador
-        'rest_framework.authentication.TokenAuthentication',     # para clientes externos
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
@@ -128,44 +122,51 @@ REST_FRAMEWORK = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# core/settings.py — agregar al final del archivo
+# ── CORREO ELECTRÓNICO (RESEND) ───────────────────────────────────────────
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'
+)
 
-# ── JAZZMIN — Personalización del admin con Fable 5 AzulERP ───────────────
+DEFAULT_FROM_EMAIL = env(
+    'DEFAULT_FROM_EMAIL',
+    default='ERP Django <onboarding@resend.dev>'
+)
+
+EMAIL_SUBJECT_PREFIX = '[ERP Django] '
+
+ADMINS = [
+    ('Admin ERP', env('ADMIN_EMAIL', default='admin@erp-django.com')),
+]
+
+RESEND_API_KEY = env('RESEND_API_KEY', default='')
+ANYMAIL = {
+    'RESEND_API_KEY': RESEND_API_KEY,
+}
+
+# ── JAZZMIN — Personalización del admin ───────────────────────────────────
 JAZZMIN_SETTINGS = {
-    # Identidad
     'site_title':       "Dongu's Admin",
     'site_header':      "Dongu's",
     'site_brand':       "Dongu's",
     'welcome_sign':     'Dongu',
     'copyright':        'Ramses Oswaldo Dongu Martinez',
-
-    # Icono del sitio (usar emoji como fallback)
     'site_icon':        None,
-    'site_logo':        None,    # ruta a logo en static/ (agregar en W11+)
-
-    # Búsqueda global en el admin
+    'site_logo':        None,
     'search_model':     ['clientes.Cliente', 'productos.Producto'],
-
-    # Menú superior (top navigation)
     'topmenu_links': [
         {'name': 'Inicio ERP',   'url': '/', 'new_window': False},
         {'name': 'Productos',    'url': '/productos/'},
         {'name': 'Clientes',     'url': '/clientes/'},
         {'name': 'Ventas',       'url': '/ventas/'},
     ],
-
-    # Menú de usuario (avatar)
     'usermenu_links': [
         {'name': 'Ver ERP', 'url': '/', 'new_window': False},
     ],
-
-    # Menú lateral: orden de apps y modelos
     'order_with_respect_to': [
         'clientes', 'proveedores', 'productos',
         'ventas', 'configuracion', 'auth',
     ],
-
-    # Iconos de Font Awesome para cada modelo
     'icons': {
         'auth':                       'fas fa-users-cog',
         'auth.user':                  'fas fa-user',
@@ -181,16 +182,12 @@ JAZZMIN_SETTINGS = {
     },
     'default_icon_parents': 'fas fa-folder',
     'default_icon_children': 'fas fa-circle',
-
-    # Apariencia
     'related_modal_active':     True,
-    'custom_css':               'erp_custom.css',   # archivo en static/
+    'custom_css':               'erp_custom.css',
     'show_sidebar':             True,
     'navigation_expanded':      True,
     'hide_apps':                [],
     'hide_models':              [],
-
-    # UI tweaks
     'changeform_format':        'horizontal_tabs',
     'language_chooser':         False,
 }
@@ -216,7 +213,7 @@ JAZZMIN_UI_TWEAKS = {
     'sidebar_nav_legacy_style': False,
     'sidebar_nav_flat_style':   False,
     'theme':                    'default',
-    'default_theme_mode':       'auto',   # Jazzmin 3.x
+    'default_theme_mode':       'auto',
     'button_classes': {
         'primary':   'btn-primary',
         'secondary': 'btn-secondary',
@@ -232,24 +229,54 @@ SITE_ID = 1
 
 # ── AUTHENTICATION BACKENDS ───────────────────────────────────────────────
 AUTHENTICATION_BACKENDS = [
-    # Backend estándar de Django (username + password en admin)
     'django.contrib.auth.backends.ModelBackend',
-    # Backend de allauth (permite login por email también)
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# ── ALLAUTH: configuración para desarrollo académico ──────────────────────
+# ── ALLAUTH ───────────────────────────────────────────────────────────────
 ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION     = 'none'         # no enviar email de verificación
-ACCOUNT_LOGOUT_ON_GET          = True           # logout sin confirmar (dev)
-ACCOUNT_SESSION_REMEMBER       = True           # recordar sesión
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_SESSION_REMEMBER = True
 
-# LOGIN_URL y LOGIN_REDIRECT_URL ya definidos en W01:
-# LOGIN_URL           = '/accounts/login/'
-# LOGIN_REDIRECT_URL  = '/productos/'
 LOGOUT_REDIRECT_URL = '/'
 
-# ── STRIPE (Pasarela de pago) ──────────────────────────────────────────────
+# ── STRIPE ────────────────────────────────────────────────────────────────
 STRIPE_SECRET_KEY      = env('STRIPE_SECRET_KEY', default='sk_test_placeholder')
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_placeholder')
 STRIPE_WEBHOOK_SECRET  = env('STRIPE_WEBHOOK_SECRET', default='whsec_placeholder')
+
+# ── CELERY — Cola de tareas asíncronas ────────────────────────────────────
+# Si REDIS_URL está definida (Render), usa Redis.
+# Si está vacía (Local sin Docker), usa modo EAGER (memoria).
+REDIS_URL = env('REDIS_URL', default='')
+
+if REDIS_URL:
+    CELERY_BROKER_URL     = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_TASK_ALWAYS_EAGER = False
+else:
+    CELERY_BROKER_URL        = 'memory://'
+    CELERY_RESULT_BACKEND    = 'cache+memory://'
+    CELERY_TASK_ALWAYS_EAGER = True
+
+# ⚠️ IMPORTANTE: NO usar CELERY_BROKER_USE_SSL. 
+# La URL rediss:// ya configura el SSL automáticamente.
+
+CELERY_ACCEPT_CONTENT    = ['json']
+CELERY_TASK_SERIALIZER   = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TASK_SOFT_TIME_LIMIT = 300
+CELERY_TASK_TIME_LIMIT       = 360
+CELERY_TASK_DEFAULT_QUEUE = 'erp_django'
+CELERY_TASK_EAGER_PROPAGATES = True
+
+# ── MODO TEST ─────────────────────────────────────────────────────────────
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'

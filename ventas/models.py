@@ -1,8 +1,10 @@
 # ventas/models.py
-"""Modelos de la app ventas — W15.
+"""Modelos de la app ventas — W17.
 
-Se agregó items_snapshot al modelo Pedido para guardar una copia
-del carrito y poder descontar el stock desde el webhook.
+Modelos:
+    Venta
+    DetalleVenta
+    Pedido (con correo_enviado para idempotencia)
 """
 from decimal import Decimal
 
@@ -98,7 +100,7 @@ class DetalleVenta(models.Model):
 # ── Pedido ─────────────────────────────────────────────────────────────────
 
 class Pedido(models.Model):
-    """Orden de compra del canal e-commerce (W14/W15)."""
+    """Orden de compra del canal e-commerce (W17)."""
 
     ESTADO_CHOICES = [
         ('pendiente',  'Pendiente de pago'),
@@ -139,7 +141,6 @@ class Pedido(models.Model):
         verbose_name='Total pagado'
     )
     
-    # NUEVO CAMPO W15: Guarda el carrito para que el webhook sepa qué descontar
     items_snapshot = models.JSONField(
         default=list,
         blank=True,
@@ -149,6 +150,13 @@ class Pedido(models.Model):
             'Estructura: [{"producto_id": 1, "nombre": "...", '
             '"cantidad": 2, "precio": "500.00"}]'
         )
+    )
+
+    # ── NUEVO CAMPO W17: idempotencia en el envío de correo ──────────────
+    correo_enviado = models.BooleanField(
+        default=False,
+        verbose_name='Correo de confirmación enviado',
+        help_text='True cuando se envió el correo de confirmación al cliente.'
     )
 
     class Meta:
